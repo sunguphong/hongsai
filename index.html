@@ -266,7 +266,7 @@
     75% { transform: translateX(-4px); }
   }
   .gate label { display: block; margin-bottom: 12px; font-weight: 500; }
-  .gate input {
+  .gate input[type="password"] {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--line);
@@ -278,7 +278,7 @@
     letter-spacing: 0.3em;
     text-align: center;
   }
-  .gate input:focus {
+  .gate input[type="password"]:focus {
     outline: none;
     border-color: var(--accent-1);
     box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.25);
@@ -295,6 +295,34 @@
     font-weight: 700;
     cursor: pointer;
   }
+  .gate-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .gate-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .gate-options input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent-1); cursor: pointer; }
+  .logout {
+    margin-left: 10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .logout:hover { color: var(--text); }
   .gate-error { min-height: 1.5em; margin-top: 12px; color: #fb7185; font-size: 0.88rem; }
 
   /* 태블릿 2열 */
@@ -324,6 +352,10 @@
     <form id="gate-form">
       <label for="gate-input">비밀번호를 입력하세요</label>
       <input id="gate-input" type="password" inputmode="numeric" autocomplete="off" autofocus>
+      <div class="gate-options">
+        <label><input type="checkbox" id="save-password"> 비밀번호 저장</label>
+        <label><input type="checkbox" id="auto-login"> 자동 로그인</label>
+      </div>
       <button type="submit">입장</button>
       <p class="gate-error" id="gate-error" role="alert"></p>
     </form>
@@ -348,7 +380,7 @@
     <p class="empty" id="empty" role="status" hidden>검색 결과가 없습니다.</p>
   </main>
 
-  <footer>© 2026 HONG'S AI</footer>
+  <footer>© 2026 HONG'S AI <button type="button" class="logout" id="logout">로그아웃</button></footer>
 
 <script>
   // ▼ 새 사이트는 여기에 한 줄만 추가하면 카드가 자동으로 생깁니다.
@@ -428,10 +460,37 @@
 
   // 비밀번호 화면. 비밀번호를 바꾸려면 새 비밀번호의 SHA-256 값으로 교체합니다.
   const PASSWORD_HASH = "f40ddf6742b7761b0f7df1f65a639c4fccc23479c5c4c984885ff588f1dfeb0e";
-  const UNLOCK_KEY = "hongsai-unlocked";
+  const UNLOCK_KEY = "hongsai-unlocked";          // 같은 탭 유지 (sessionStorage)
+  const SAVED_PASSWORD_KEY = "hongsai-saved-password"; // 비밀번호 저장 (localStorage)
+  const AUTO_LOGIN_KEY = "hongsai-auto-login";     // 자동 로그인 (localStorage)
   const gateForm = document.getElementById("gate-form");
   const gateInput = document.getElementById("gate-input");
   const gateError = document.getElementById("gate-error");
+  const savePassword = document.getElementById("save-password");
+  const autoLogin = document.getElementById("auto-login");
+
+  // 브라우저 저장소 접근이 막혀 있어도(사생활 보호 모드 등) 페이지가 동작하도록 감쌈
+  const store = {
+    get(area, key) { try { return window[area].getItem(key); } catch { return null; } },
+    set(area, key, value) { try { window[area].setItem(key, value); } catch {} },
+    remove(area, key) { try { window[area].removeItem(key); } catch {} },
+  };
+
+  function fillSavedPassword() {
+    const saved = store.get("localStorage", SAVED_PASSWORD_KEY);
+    gateInput.value = saved || "";
+    savePassword.checked = saved !== null;
+    autoLogin.checked = false;
+  }
+
+  document.getElementById("logout").addEventListener("click", () => {
+    store.remove("sessionStorage", UNLOCK_KEY);
+    store.remove("localStorage", AUTO_LOGIN_KEY);
+    fillSavedPassword();
+    gateError.textContent = "";
+    document.body.classList.add("locked");
+    gateInput.focus();
+  });
 
   async function sha256(text) {
     const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -439,7 +498,8 @@
   }
 
   function isRemembered() {
-    try { return sessionStorage.getItem(UNLOCK_KEY) === PASSWORD_HASH; } catch { return false; }
+    return store.get("sessionStorage", UNLOCK_KEY) === PASSWORD_HASH
+      || store.get("localStorage", AUTO_LOGIN_KEY) === PASSWORD_HASH;
   }
 
   function unlock() {
@@ -451,7 +511,11 @@
     event.preventDefault();
     const hash = await sha256(gateInput.value);
     if (hash === PASSWORD_HASH) {
-      try { sessionStorage.setItem(UNLOCK_KEY, hash); } catch {}
+      store.set("sessionStorage", UNLOCK_KEY, hash);
+      if (savePassword.checked) store.set("localStorage", SAVED_PASSWORD_KEY, gateInput.value);
+      else store.remove("localStorage", SAVED_PASSWORD_KEY);
+      if (autoLogin.checked) store.set("localStorage", AUTO_LOGIN_KEY, hash);
+      else store.remove("localStorage", AUTO_LOGIN_KEY);
       unlock();
       return;
     }
@@ -463,6 +527,7 @@
     gateForm.classList.add("shake");
   });
 
+  fillSavedPassword();
   if (isRemembered()) unlock();
 </script>
 </body>
