@@ -325,6 +325,126 @@
   .logout:hover { color: var(--text); }
   .gate-error { min-height: 1.5em; margin-top: 12px; color: #fb7185; font-size: 0.88rem; }
 
+  /* 관리자 메뉴 */
+  header { position: relative; }
+  .admin-toggle {
+    position: absolute;
+    top: 24px;
+    right: 0;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--glass);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: color 0.2s, background 0.2s;
+  }
+  .admin-toggle:hover { color: var(--text); background: var(--glass-strong); }
+
+  body:not(.admin-mode) .admin { display: none; }
+  body.admin-mode .toolbar,
+  body.admin-mode #grid,
+  body.admin-mode #empty { display: none !important; }
+
+  .admin-head { margin-bottom: 24px; }
+  .admin-head h2 { font-size: 1.5rem; font-weight: 700; }
+  .admin-head p { max-width: 720px; margin-top: 8px; color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
+
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 36px;
+    margin-bottom: 24px;
+    padding: 24px;
+  }
+  .flow-col { position: relative; }
+  .flow-col + .flow-col::before {
+    content: "→";
+    position: absolute;
+    top: 0;
+    left: -26px;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+  .flow-col h3 { font-size: 0.95rem; font-weight: 700; }
+  .flow-col h3 small { display: block; margin-top: 2px; color: var(--muted); font-size: 0.78rem; font-weight: 400; }
+  .flow-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+  .chip {
+    --layer: #8a90a6;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 1px solid color-mix(in srgb, var(--layer) 35%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--layer) 12%, transparent);
+    color: color-mix(in srgb, var(--layer) 70%, white);
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .chip:hover { background: color-mix(in srgb, var(--layer) 24%, transparent); }
+  .chip.on { border-color: var(--layer); background: var(--layer); color: #0b0c14; }
+  .flow .chip { width: 100%; }
+  .chip .count {
+    margin-left: auto;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--layer) 25%, transparent);
+    font-size: 0.75rem;
+  }
+  .layer-hosting { --layer: #7c8cff; }
+  .layer-server  { --layer: #fbbf24; }
+  .layer-storage { --layer: #4ade80; }
+  .layer-api     { --layer: #e879f9; }
+  .chip.unknown  { --layer: #8a90a6; }
+
+  .infra-table { padding: 4px 24px; }
+  .infra-row {
+    display: grid;
+    grid-template-columns: 1.3fr repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+    transition: opacity 0.2s;
+  }
+  .infra-row:first-child { border-top: 0; }
+  .infra-row.head { padding: 14px 0; color: var(--muted); font-size: 0.8rem; }
+  .infra-row.dim { opacity: 0.25; }
+  .cell { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; }
+  .svc-name { font-size: 0.95rem; font-weight: 700; line-height: 1.4; }
+  .svc-note { margin-top: 6px; color: var(--muted); font-size: 0.8rem; line-height: 1.55; }
+  .none { color: var(--muted); font-size: 0.82rem; }
+  .admin-note { margin-top: 16px; color: var(--muted); font-size: 0.8rem; line-height: 1.6; }
+
+  @media (max-width: 1024px) {
+    .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .flow-col + .flow-col::before { display: none; }
+    .infra-row.head { display: none; }
+    .infra-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .cell::before { content: attr(data-label); width: 100%; color: var(--muted); font-size: 0.75rem; }
+  }
+  @media (max-width: 640px) {
+    .admin-toggle { top: 10px; }
+    .flow { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 20px; }
+    .infra-table { padding: 4px 20px; }
+  }
+
   /* 태블릿 2열 */
   @media (max-width: 1024px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -365,6 +485,7 @@
     <header>
       <h1 class="logo">HONG'S AI</h1>
       <p class="subtitle">Hong이 만든 AI 서비스 모음</p>
+      <button type="button" class="admin-toggle" id="admin-toggle" aria-pressed="false">⚙ 관리자</button>
     </header>
   </div>
 
@@ -378,6 +499,16 @@
     </div>
     <div class="grid" id="grid"></div>
     <p class="empty" id="empty" role="status" hidden>검색 결과가 없습니다.</p>
+
+    <section class="admin" id="admin" aria-label="관리자 메뉴">
+      <div class="admin-head">
+        <h2>인프라 구성도</h2>
+        <p>서비스마다 어디에 올렸는지, 무엇이 돌아가는지, 데이터를 어디에 저장하는지, 어떤 AI·외부 기능을 쓰는지 정리했습니다. 항목을 누르면 그 항목을 쓰는 서비스만 강조됩니다.</p>
+      </div>
+      <div class="panel flow" id="flow"></div>
+      <div class="panel infra-table" id="infra-table"></div>
+      <p class="admin-note">근거: 각 서비스의 공개 GitHub 저장소 코드와 README (2026-11-19 확인). '추정'·'미확인'은 저장소가 없어 주소로만 판단한 항목입니다.</p>
+    </section>
   </main>
 
   <footer>© 2026 HONG'S AI <button type="button" class="logout" id="logout">로그아웃</button></footer>
@@ -459,6 +590,145 @@
 
   search.addEventListener("input", render);
 
+  // ▼ 관리자 메뉴: 서비스별 인프라 구성. 키는 sites의 name과 같아야 합니다.
+  //   hosting(어디에 올렸나) / server(무엇이 돌아가나) / storage(어디에 저장하나) / api(AI·외부 기능)
+  const UNKNOWN = "미확인";
+  const infra = {
+    "HONG'S AI": {
+      hosting: ["GitHub Pages"], server: ["없음 (정적 페이지)"],
+      storage: ["브라우저 localStorage", "브라우저 sessionStorage"], api: ["Google Fonts"],
+      note: "단일 index.html. 자동 로그인·비밀번호 저장 정보만 브라우저에 보관",
+    },
+    "동탄역포레너스 매물추적기": {
+      hosting: ["GitHub Pages"], server: ["PC Node.js 서버", "Cloudflare Tunnel"],
+      storage: ["PC 로컬 파일 (JSON)", "GitHub 저장소 (Git)"], api: ["네이버 부동산", "국토부 실거래가", "호갱노노"],
+      note: "PC 서버가 30분마다 수집해 history.json에 쌓고, 공개용 요약(docs/data.json)을 GitHub에 올림. 공개 페이지의 수동 수집은 터널을 거쳐 PC 서버에 요청",
+    },
+    "열림시스템 주간보고": {
+      hosting: ["Google Cloud VM (추정)"], server: [UNKNOWN], storage: [UNKNOWN], api: [UNKNOWN],
+      note: "저장소 코드가 없어 접속 주소(35.239.228.66 · sslip.io)로만 추정",
+    },
+    "다양한정보 수집 Agent": {
+      hosting: ["GitHub Pages"], server: ["GitHub Actions (예약 실행)", "Windows 작업 스케줄러", "PC Node.js 서버", "ngrok"],
+      storage: ["GitHub 저장소 (Git)", "PC 로컬 파일 (JSON)"], api: ["RSS 뉴스", "Claude Code CLI", "Gmail SMTP"],
+      note: "매일 아침 RSS 수집 → Claude 요약 → 메일 발송. 실행 기록은 ci-state 브랜치에 저장. GitHub Pages는 안내 페이지, 관리 웹은 PC에서 실행",
+    },
+    "업이의 꽌시노트": {
+      hosting: ["GitHub Pages"], server: ["Google Apps Script"],
+      storage: ["브라우저 localStorage", "Google 스프레드시트"], api: [],
+      note: "구글 시트에는 비밀번호로 암호화한 데이터만 동기화",
+    },
+    "우리집 건강돌봄이": {
+      hosting: ["GitHub Pages"], server: ["Supabase"],
+      storage: ["브라우저 IndexedDB", "Supabase (PostgreSQL)"], api: ["Claude API", "Tesseract.js OCR", "pdf.js"],
+      note: "React + Vite 빌드 후 gh-pages 브랜치로 배포. 로그인 계정은 Supabase 관리자만 생성. AI 추출은 선택 기능",
+    },
+    "안전보건 입찰 평가표 시뮬레이션": {
+      hosting: ["GitHub Pages"], server: ["PC Node.js 서버", "Cloudflare Tunnel", "ngrok"],
+      storage: ["브라우저 localStorage"], api: ["Tesseract.js OCR"],
+      note: "기본은 서버 없이 동작. 여러 명이 함께 편집할 때만 PC 서버를 터널로 공개",
+    },
+    "SAP ABAP 30일×2 완성": {
+      hosting: ["GitHub Pages"], server: ["없음 (정적 페이지)"],
+      storage: ["브라우저 localStorage"], api: ["Claude API"],
+      note: "HTML·CSS·JS 정적 사이트. 질문 기능은 본인 Anthropic API 키 사용",
+    },
+    "우리집 관리비": {
+      hosting: ["GitHub Pages"], server: ["Cloudflare Worker"],
+      storage: ["브라우저 IndexedDB"], api: ["Claude API"],
+      note: "고지서 캡처를 Claude가 분석. API 키를 숨기는 Cloudflare Worker 프록시 사용",
+    },
+    "The Daily Fit": {
+      hosting: ["GitHub Pages"], server: ["없음 (정적 페이지)"],
+      storage: ["브라우저 localStorage", "브라우저 IndexedDB"], api: ["Claude API", "Gemini API", "Open-Meteo 날씨", "MediaPipe"],
+      note: "단일 HTML. API 키는 각 기기 브라우저에만 저장. 얼굴 블러는 기기 안에서 처리",
+    },
+    "SAP 개발팀 개발 관리 보드": {
+      hosting: ["자체 서버 (추정)"], server: ["Cloudflare Tunnel"], storage: [UNKNOWN], api: [UNKNOWN],
+      note: "trycloudflare.com 임시 터널 주소. 터널을 다시 켜면 주소가 바뀜",
+    },
+  };
+
+  const LAYERS = [
+    { key: "hosting", title: "호스팅", desc: "어디에 올렸나" },
+    { key: "server", title: "서버·자동화", desc: "무엇이 돌아가나" },
+    { key: "storage", title: "데이터 저장", desc: "어디에 저장하나" },
+    { key: "api", title: "AI·외부 기능", desc: "무엇을 쓰나" },
+  ];
+  const flow = document.getElementById("flow");
+  const infraTable = document.getElementById("infra-table");
+  const adminToggle = document.getElementById("admin-toggle");
+  let activeChip = null;
+
+  function infraRows() {
+    const missing = { hosting: [UNKNOWN], server: [UNKNOWN], storage: [UNKNOWN], api: [UNKNOWN], note: "인프라 정보가 아직 등록되지 않았습니다." };
+    return [
+      { name: "HONG'S AI (이 포털)", icon: "✨", ...infra["HONG'S AI"] },
+      ...sites.map(site => ({ name: site.name, icon: site.icon, ...(infra[site.name] || missing) })),
+    ];
+  }
+
+  function chip(layer, label, count) {
+    const key = `${layer}|${label}`;
+    const button = el("button", `chip layer-${layer}` + (label === UNKNOWN ? " unknown" : ""), label);
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(activeChip === key));
+    if (activeChip === key) button.classList.add("on");
+    if (count !== undefined) button.append(el("span", "count", String(count)));
+    button.addEventListener("click", () => {
+      activeChip = activeChip === key ? null : key;
+      renderAdmin();
+    });
+    return button;
+  }
+
+  function renderAdmin() {
+    const rows = infraRows();
+
+    flow.replaceChildren(...LAYERS.map((layer, i) => {
+      const counts = new Map();
+      rows.forEach(row => (row[layer.key] || []).forEach(item => counts.set(item, (counts.get(item) || 0) + 1)));
+      const sorted = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
+      const col = el("div", "flow-col");
+      const title = el("h3", "", `${i + 1}. ${layer.title}`);
+      title.append(el("small", "", layer.desc));
+      const list = el("div", "flow-list");
+      list.append(...sorted.map(([label, count]) => chip(layer.key, label, count)));
+      col.append(title, list);
+      return col;
+    }));
+
+    const head = el("div", "infra-row head");
+    head.append(el("div", "", "서비스"), ...LAYERS.map(layer => el("div", "", layer.title)));
+    infraTable.replaceChildren(head, ...rows.map(row => {
+      const line = el("div", "infra-row");
+      if (activeChip) {
+        const [layer, label] = activeChip.split("|");
+        if (!(row[layer] || []).includes(label)) line.classList.add("dim");
+      }
+      const nameCell = el("div");
+      nameCell.append(el("div", "svc-name", `${row.icon} ${row.name}`), el("div", "svc-note", row.note || ""));
+      line.append(nameCell, ...LAYERS.map(layer => {
+        const cell = el("div", "cell");
+        cell.dataset.label = layer.title;
+        const items = row[layer.key] || [];
+        if (items.length) cell.append(...items.map(item => chip(layer.key, item)));
+        else cell.append(el("span", "none", "—"));
+        return cell;
+      }));
+      return line;
+    }));
+  }
+
+  function setAdmin(on) {
+    document.body.classList.toggle("admin-mode", on);
+    adminToggle.textContent = on ? "← 서비스 목록" : "⚙ 관리자";
+    adminToggle.setAttribute("aria-pressed", String(on));
+    if (on) renderAdmin();
+  }
+
+  adminToggle.addEventListener("click", () => setAdmin(!document.body.classList.contains("admin-mode")));
+
   // 비밀번호 화면. 비밀번호를 바꾸려면 새 비밀번호의 SHA-256 값으로 교체합니다.
   const PASSWORD_HASH = "f40ddf6742b7761b0f7df1f65a639c4fccc23479c5c4c984885ff588f1dfeb0e";
   const UNLOCK_KEY = "hongsai-unlocked";          // 같은 탭 유지 (sessionStorage)
@@ -490,6 +760,7 @@
     fillSavedPassword();
     gateError.textContent = "";
     document.body.classList.add("locked");
+    setAdmin(false);
     gateInput.focus();
   });
 
